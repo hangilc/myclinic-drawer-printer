@@ -1,34 +1,49 @@
 "use strict";
 
-var drawer = require("bindings")("drawer");
-module.exports = drawer;
+var api = require("bindings")("drawer");
+var Printer = require("./printer");
+
+exports.api = api;
 
 /*
-drawer.createWindow() ==> hwnd
-drawer.disposeWindow(hwnd) ==> bool (ok)
-drawer.getDc(hwnd) ==> hdc
-drawer.releaseDc(hwnd, hdc) ==> bool (ok)
-drawer.measureText(hdc, string) => { cx:..., cy:... }
-drawer.createFont(fontname, size, weight?, italic?) ==> HANDLE
-drawer.deleteObject(obj) ==> bool (ok)
-drawer.getDpiOfHdc(hdc) ==> { dpix:..., dpiy:... }
-drawer.printerDialog(devmode?, devnames?) ==> { devmode:..., devnames:... }
-drawer.parseDevmode(devmode) ==> { deviceName:..., ... }
-drawer.parseDevnames(devnames) ==> { driver:..., ... }
-drawer.createDc(devmode, devnames) ==> hdc
-drawer.deleteDc(hdc) ==> bool (ok)
-drawer.beginPrint(hdc) ==> (throws exception if it fails)
-drawer.endPrint(hdc) ==> (throws exception if it fails)
-drawer.abortPrint(hdc) ==> (throws exception if it fails)
-drawer.startPage(hdc) ==> (throws exception if it fails)
-drawer.endPage(hdc) ==> (throws exception if it fails)
-drawer.moveTo(hdc, x, y) ==> (throws exception if it fails)
-drawer.lineTo(hdc, x, y) ==> (throws exception if it fails)
-drawer.textOut(hdc, x, y, text) ==> (throws exception if it fails)
-drawer.selectObject(hdc, handle) ==> (throws exception if it fails)
-drawer.setTextColor(hdc, r, g, b) ==> (throws exception if it fails)
-drawer.createPen(width, r, g, b) ==> (throws exception if it fails)
-drawer.setBkMode(hdc, mode) ==> (throws exception if it fails)
+api.createWindow() ==> hwnd
+api.disposeWindow(hwnd) ==> bool (ok)
+api.getDc(hwnd) ==> hdc
+api.releaseDc(hwnd, hdc) ==> bool (ok)
+api.measureText(hdc, string) => { cx:..., cy:... }
+api.createFont(fontname, size, weight?, italic?) ==> HANDLE
+api.deleteObject(obj) ==> bool (ok)
+api.getDpiOfHdc(hdc) ==> { dpix:..., dpiy:... }
+api.printerDialog(devmode?, devnames?) ==> { devmode:..., devnames:... }
+api.parseDevmode(devmode) ==> { deviceName:..., ... }
+api.parseDevnames(devnames) ==> { driver:..., ... }
+api.createDc(devmode, devnames) ==> hdc
+api.deleteDc(hdc) ==> bool (ok)
+api.beginPrint(hdc) ==> (throws exception if it fails)
+api.endPrint(hdc) ==> (throws exception if it fails)
+api.abortPrint(hdc) ==> (throws exception if it fails)
+api.startPage(hdc) ==> (throws exception if it fails)
+api.endPage(hdc) ==> (throws exception if it fails)
+api.moveTo(hdc, x, y) ==> (throws exception if it fails)
+api.lineTo(hdc, x, y) ==> (throws exception if it fails)
+api.textOut(hdc, x, y, text) ==> (throws exception if it fails)
+api.selectObject(hdc, handle) ==> (throws exception if it fails)
+api.setTextColor(hdc, r, g, b) ==> (throws exception if it fails)
+api.createPen(width, r, g, b) ==> (throws exception if it fails)
+api.setBkMode(hdc, mode) ==> (throws exception if it fails)
 */
 
-
+exports.printPages = function(pages, optSetting){
+	var hdc;
+	if( !optSetting ){
+		var setting = api.printerDialog();
+		if( !setting ){
+			return;
+		}
+		hdc = api.createDc(setting.devmode, setting.devnames);
+	}
+	var printer = new Printer(hdc);
+	printer.print(pages);
+	printer.dispose();
+	api.deleteDc(hdc);
+}

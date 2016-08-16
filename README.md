@@ -5,31 +5,31 @@ A printing library for Windows OS.
 ## API
 
 ```
-createWindow() ==> hwnd
-disposeWindow(hwnd) ==> bool (ok)
-getDc(hwnd) ==> hdc
-releaseDc(hwnd, hdc) ==> bool (ok)
-measureText(hdc, string) => { cx:..., cy:... }
-createFont(fontname, size, weight?, italic?) ==> HANDLE
-deleteObject(obj) ==> bool (ok)
-getDpiOfHdc(hdc) ==> { dpix:..., dpiy:... }
-printerDialog(devmode?, devnames?) ==> { devmode:..., devnames:... }
-parseDevmode(devmode) ==> { deviceName:..., ... }
-parseDevnames(devnames) ==> { driver:..., ... }
-createDc(devmode, devnames) ==> hdc
-deleteDc(hdc) ==> bool (ok)
-beginPrint(hdc) ==> (throws exception if it fails)
-endPrint(hdc) ==> (throws exception if it fails)
-abortPrint(hdc) ==> (throws exception if it fails)
-startPage(hdc) ==> (throws exception if it fails)
-endPage(hdc) ==> (throws exception if it fails)
-moveTo(hdc, x, y) ==> (throws exception if it fails)
-lineTo(hdc, x, y) ==> (throws exception if it fails)
-textOut(hdc, x, y, text) ==> (throws exception if it fails)
-selectObject(hdc, handle) ==> (throws exception if it fails)
-setTextColor(hdc, r, g, b) ==> (throws exception if it fails)
-createPen(width, r, g, b) ==> (throws exception if it fails)
-setBkMode(hdc, mode) ==> (throws exception if it fails)
+api.createWindow() ==> hwnd
+api.disposeWindow(hwnd) ==> bool (ok)
+api.getDc(hwnd) ==> hdc
+api.releaseDc(hwnd, hdc) ==> bool (ok)
+api.measureText(hdc, string) => { cx:..., cy:... }
+api.createFont(fontname, size, weight?, italic?) ==> HANDLE
+api.deleteObject(obj) ==> bool (ok)
+api.getDpiOfHdc(hdc) ==> { dpix:..., dpiy:... }
+api.printerDialog(devmode?, devnames?) ==> { devmode:..., devnames:... }
+api.parseDevmode(devmode) ==> { deviceName:..., ... }
+api.parseDevnames(devnames) ==> { driver:..., ... }
+api.createDc(devmode, devnames) ==> hdc
+api.deleteDc(hdc) ==> bool (ok)
+api.beginPrint(hdc) ==> (throws exception if it fails)
+api.endPrint(hdc) ==> (throws exception if it fails)
+api.abortPrint(hdc) ==> (throws exception if it fails)
+api.startPage(hdc) ==> (throws exception if it fails)
+api.endPage(hdc) ==> (throws exception if it fails)
+api.moveTo(hdc, x, y) ==> (throws exception if it fails)
+api.lineTo(hdc, x, y) ==> (throws exception if it fails)
+api.textOut(hdc, x, y, text) ==> (throws exception if it fails)
+api.selectObject(hdc, handle) ==> (throws exception if it fails)
+api.setTextColor(hdc, r, g, b) ==> (throws exception if it fails)
+api.createPen(width, r, g, b) ==> (throws exception if it fails)
+api.setBkMode(hdc, mode) ==> (throws exception if it fails)
 ```
 
 ## License

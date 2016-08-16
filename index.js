@@ -1,6 +1,7 @@
 "use strict";
 
 var drawer = require("bindings")("drawer");
+module.exports = drawer;
 
 /*
 drawer.createWindow() ==> hwnd

@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 "use strict";
 
 var drawer = require("myclinic-drawer-printer");

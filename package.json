@@ -4,6 +4,10 @@
   "description": "A printing library for Windows OS",
   "main": "index.js",
   "engine": "0.12.x",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:hangilc/myclinic-drawer-printer.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -1,6 +1,6 @@
 {
   "name": "myclinic-drawer-printer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A printing library for Windows OS",
   "main": "index.js",
   "engine": "0.12.x",

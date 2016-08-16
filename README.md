@@ -5,6 +5,16 @@ A printing library for Windows OS.
 ## API
 
 ```
+printPages(pages, setting)
+printerDialog(optDefaultSetting)
+setSettingDir(path)
+settingExists(name, cb)
+listSettings(cb)
+saveSettings(name, setting, done)
+readSetting(name, cb)
+parseSetting(setting)
+deleteSetting(name, done)
+
 api.createWindow() ==> hwnd
 api.disposeWindow(hwnd) ==> bool (ok)
 api.getDc(hwnd) ==> hdc

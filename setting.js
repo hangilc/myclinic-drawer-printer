@@ -100,7 +100,6 @@ function readSetting(name, cb){
     				done(err);
     				return;
     			}
-    			console.log("devmode", result);
     			setting.devmode = result;
     			done();
     		})

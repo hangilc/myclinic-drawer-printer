@@ -15,6 +15,7 @@ if( args.length === 0 ){
 function printUsage(){
 	console.log("usage: drawer-print COMMAND args...");
 	console.log("COMMAND is ");
+	console.log("  init -- creates 'printer-settings' directory");
 	console.log("  list -- to list the current settings");
 	console.log("  create NAME -- create a printer setting");
 	console.log("  show [NAME, ...] -- prints details of settings");
@@ -26,6 +27,7 @@ function printUsage(){
 
 var command = args.shift();
 switch(command){
+	case "init": doInit(args); break;
 	case "list": doListSettings(); break;
 	case "create": doCreate(args); break;
 	case "show": doShow(args); break;
@@ -33,6 +35,25 @@ switch(command){
 	case "delete": doDelete(args); break;
 	case "print": doPrint(args); break;
 	default: console.log("unknown command: " + command); process.exit(2);
+}
+
+function doInit(args){
+	if( args.length !== 0 ){
+		console.log("usage: drawer-print init");
+		process.exit(2);
+	}
+	fs.mkdir("printer-settings", function(err){
+		if( err ){
+			if( err.code === 'EEXIST' ){
+				console.log("printer-settings already exists (not created)");
+			} else {
+				console.log(err);
+			}
+			process.exit(3);
+		} else {
+			console.log("printer-settings directory created");
+		}
+	})
 }
 
 function doListSettings(){

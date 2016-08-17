@@ -4,6 +4,7 @@
 var drawer = require("myclinic-drawer-printer");
 var conti = require("conti");
 var readline = require("readline");
+var fs = require("fs");
 
 var args = process.argv.slice(2);
 if( args.length === 0 ){
@@ -19,6 +20,7 @@ function printUsage(){
 	console.log("  show [NAME, ...] -- prints details of settings");
 	console.log("  edit NAME -- modify setting");
 	console.log("  delete NAME -- delete a setting");
+	console.log("  print PAGES [SETTING]  -- print PAGES with optional SETTING")
 	console.log("  help -- print this message");
 }
 
@@ -29,6 +31,7 @@ switch(command){
 	case "show": doShow(args); break;
 	case "edit": doEdit(args); break;
 	case "delete": doDelete(args); break;
+	case "print": doPrint(args); break;
 	default: console.log("unknown command: " + command); process.exit(2);
 }
 
@@ -154,6 +157,52 @@ function doDelete(args){
 			console.log("Setting " + name + " has been deleted successfully.");
 			rl.close();
 		})
+	})
+}
+
+function doPrint(args){
+	if( !(args.length === 1 || args.length === 2) ){
+		console.log("usage: drawer-print print PAGES [SETTING]");
+		process.exit(2);
+	}
+	var pagesPath = args[0];
+	var settingName = args[1];
+	var pages;
+	var setting;
+	conti.exec([
+		function(done){
+			var pagesJson = fs.readFileSync(pagesPath, {encoding: "utf-8"});
+			pages = JSON.parse(pagesJson);
+			done();
+		},
+		function(done){
+			if( settingName ){
+				drawer.readSetting(settingName, function(err, result){
+					if( err ){
+						done(err);
+						return;
+					}
+					setting = result;
+					done();
+				})
+			} else {
+				setting = drawer.printerDialog();
+				if( !setting ){
+					done("canceled");
+					return;
+				}
+				done();
+			}
+		},
+		function(done){
+			drawer.printPages(pages, setting);
+			done();
+		}
+	], function(err){
+		if( err ){
+			throw err;
+		}
+		console.log("Printing done");
 	})
 }
 

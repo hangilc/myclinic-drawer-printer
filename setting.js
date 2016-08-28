@@ -125,9 +125,10 @@ function readSetting(name, cb){
     				return;
     			}
                 var aux = JSON.parse(result.toString("utf-8"));
-                for(key in aux){
-                    setting[key] = aux[key];
-                }
+                setting.aux = aux;
+                // for(key in aux){
+                //     setting[key] = aux[key];
+                // }
     			done();
     		})
     	},
@@ -150,16 +151,20 @@ function parseDevmode(devmode){
 }
 
 function parseSetting(setting){
-	var retval = {};
-	Object.keys(setting).forEach(function(key){
-		if( key === "devmode" ){
-			retval.devmode = parseDevmode(setting.devmode);
-		} else if( key === "devnames" ){
-			retval.devnames = drawer.parseDevnames(setting.devnames);
-		} else {
-			retval[key] = setting[key];
-		}
-	});
+	var retval = {
+		devmode: parseDevmode(setting.devmode),
+		devnames: drawer.parseDevnames(setting.devnames),
+		aux: setting.aux
+	};
+	// Object.keys(setting).forEach(function(key){
+	// 	if( key === "devmode" ){
+	// 		retval.devmode = parseDevmode(setting.devmode);
+	// 	} else if( key === "devnames" ){
+	// 		retval.devnames = drawer.parseDevnames(setting.devnames);
+	// 	} else {
+	// 		retval[key] = setting[key];
+	// 	}
+	// });
 	return retval;
 }
 

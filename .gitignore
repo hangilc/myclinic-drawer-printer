@@ -2,5 +2,7 @@ build/
 node_modules/
 printer-settings/
 test-out.json
+npm-debug.log
+
 
 

@@ -36,10 +36,20 @@ api.setBkMode(hdc, mode) ==> (throws exception if it fails)
 
 exports.printPages = function(pages, setting){
 	var hdc = api.createDc(setting.devmode, setting.devnames);
-	var printer = new Printer(hdc);
-	printer.print(pages);
-	printer.dispose();
-	api.deleteDc(hdc);
+	if( hdc === 0 ){
+		return "cannot create hdc";
+	}
+	try{
+		var printer = new Printer(hdc);
+		printer.print(pages);
+		printer.dispose();
+		api.deleteDc(hdc);
+		return null;
+	} catch(ex){
+		api.deleteDc(hdc);
+		console.log(ex);
+		return ex;
+	}
 };
 
 exports.setSettingDir = function(path){

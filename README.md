@@ -2,6 +2,7 @@
 
 A printing library for Windows OS.
 
+Warning: this module is targeted at ver 0.12 of node.js, and would not compile with other versions of node.js.
 ## API
 
 ```

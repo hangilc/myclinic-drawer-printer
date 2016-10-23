@@ -17,4 +17,7 @@ var pages = [
 	]
 ];
 
-drawer.printPages(pages);
+var setting = drawer.printerDialog();
+if( setting ){
+	drawer.printPages(pages, setting);
+}

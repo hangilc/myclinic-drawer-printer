@@ -549,6 +549,70 @@ void selectObject(const Nan::FunctionCallbackInfo<Value>& args){
 	args.GetReturnValue().Set((int)prev);
 }
 
+void setTextColor(const Nan::FunctionCallbackInfo<Value>& args){
+	// setTextColor(hdc, r, g, b)
+	if( args.Length() < 4 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() || !args[1]->IsInt32() || !args[2]->IsInt32() || !args[3]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	long r = args[1]->Int32Value();
+	long g = args[2]->Int32Value();
+	long b = args[3]->Int32Value();
+	COLORREF ret = SetTextColor(hdc, RGB(r, g, b));
+	if( ret == CLR_INVALID ){
+		Nan::ThrowTypeError("SetTextColor failed");
+		return;
+	}
+	args.GetReturnValue().Set(TRUE);
+}
+
+void createPen(const Nan::FunctionCallbackInfo<Value>& args){
+	// createPen(width, r, g, b)
+	if( args.Length() < 4 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() || !args[1]->IsInt32() || !args[2]->IsInt32() || !args[3]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	long width = args[0]->Int32Value();
+	long r = args[1]->Int32Value();
+	long g = args[2]->Int32Value();
+	long b = args[3]->Int32Value();
+	HPEN pen = CreatePen(PS_SOLID, width, RGB(r, g, b));
+	if( pen == NULL ){
+		Nan::ThrowTypeError("CreatePen failed");
+		return;
+	}
+	args.GetReturnValue().Set((int)pen);
+}
+
+void setBkMode(const Nan::FunctionCallbackInfo<Value>& args){
+	// setBkMode(hdc, mode)
+	if( args.Length() < 2 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() || !args[1]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	int mode = args[1]->Int32Value();
+	int prev = SetBkMode(hdc, mode);
+	if( prev == 0 ){
+		Nan::ThrowTypeError("SetBkMode failed");
+		return;
+	}
+	args.GetReturnValue().Set(prev);
+}
+
 void Init(v8::Local<v8::Object> exports){
 	if( !initWindowClass() ){
 		Nan::ThrowTypeError("initWindowClass failed");
@@ -598,6 +662,16 @@ void Init(v8::Local<v8::Object> exports){
 			Nan::New<v8::FunctionTemplate>(textOut)->GetFunction());
 	exports->Set(Nan::New("selectObject").ToLocalChecked(),
 			Nan::New<v8::FunctionTemplate>(selectObject)->GetFunction());
+	exports->Set(Nan::New("setTextColor").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(setTextColor)->GetFunction());
+	exports->Set(Nan::New("createPen").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(createPen)->GetFunction());
+	exports->Set(Nan::New("setBkMode").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(setBkMode)->GetFunction());
+	exports->Set(Nan::New("bkModeOpaque").ToLocalChecked(), Nan::New(OPAQUE));
+	exports->Set(Nan::New("bkModeTransparent").ToLocalChecked(), Nan::New(TRANSPARENT));
+	exports->Set(Nan::New("FW_DONTCARE").ToLocalChecked(), Nan::New(FW_DONTCARE));
+	exports->Set(Nan::New("FW_BOLD").ToLocalChecked(), Nan::New(FW_BOLD));
 }
 
 NODE_MODULE(drawer, Init)

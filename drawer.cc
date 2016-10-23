@@ -304,6 +304,251 @@ void parseDevmode(const Nan::FunctionCallbackInfo<Value>& args){
 	args.GetReturnValue().Set(obj);
 }
 
+void parseDevnames(const Nan::FunctionCallbackInfo<Value>& args){
+	// parseDevnames(devnames)
+	if( args.Length() < 1 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsObject() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	Local<Object> devnamesBuffer = args[0]->ToObject();
+	DEVNAMES *data = (DEVNAMES *)node::Buffer::Data(devnamesBuffer);
+	WCHAR *driver, *device, *output;
+	parse_devnames(data, &driver, &device, &output);
+	Local<String> driverString = Nan::New((const uint16_t *)driver, lstrlenW(driver)).ToLocalChecked();
+	Local<String> deviceString = Nan::New((const uint16_t *)device, lstrlenW(device)).ToLocalChecked();
+	Local<String> outputString = Nan::New((const uint16_t *)output, lstrlenW(output)).ToLocalChecked();
+	Local<Object> obj = Nan::New<v8::Object>();
+	obj->Set(Nan::New("driver").ToLocalChecked(), driverString);
+	obj->Set(Nan::New("device").ToLocalChecked(), deviceString);
+	obj->Set(Nan::New("output").ToLocalChecked(), outputString);
+	args.GetReturnValue().Set(obj);
+}
+
+void createDc(const Nan::FunctionCallbackInfo<Value>& args){
+	// createDc(devmode, devnames)
+	if( args.Length() < 2 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsObject() || !args[1]->IsObject() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	DEVMODEW *devmodePtr = (DEVMODEW *)node::Buffer::Data(args[0]->ToObject());
+	DEVNAMES *devnamesPtr = (DEVNAMES *)node::Buffer::Data(args[1]->ToObject());
+	WCHAR *driver, *device, *output;
+	parse_devnames(devnamesPtr, &driver, &device, &output);
+	HDC hdc = CreateDCW(driver, device, NULL, devmodePtr);
+	if( hdc == NULL ){
+		Nan::ThrowTypeError("createDC failed");
+		return;
+	}
+	args.GetReturnValue().Set(Nan::New((int)hdc));
+}
+
+void deleteDc(const Nan::FunctionCallbackInfo<Value>& args){
+	// deleteDc(hdc)
+	if( args.Length() < 1 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	BOOL ok = DeleteDC(hdc);
+	args.GetReturnValue().Set(ok);
+}
+
+void beginPrint(const Nan::FunctionCallbackInfo<Value>& args){
+	// beginPrint(hdc)
+	if( args.Length() < 1 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	DOCINFOW docinfo;
+	ZeroMemory(&docinfo, sizeof(docinfo));
+	docinfo.cbSize = sizeof(docinfo);
+	docinfo.lpszDocName = L"drawer printing";
+	int ret = StartDocW(hdc, &docinfo);
+	if( ret <= 0 ){
+		Nan::ThrowTypeError("StartDoc failed");
+		return;
+	}
+	args.GetReturnValue().Set(ret);
+}
+
+void endPrint(const Nan::FunctionCallbackInfo<Value>& args){
+	// endPrint(hdc)
+	if( args.Length() < 1 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	int ret = EndDoc(hdc);
+	if( ret <= 0 ){
+		Nan::ThrowTypeError("EndDoc failed");
+		return;
+	}
+	args.GetReturnValue().Set(ret);
+}
+
+void abortPrint(const Nan::FunctionCallbackInfo<Value>& args){
+	// abortPrint(hdc)
+	if( args.Length() < 1 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	int ret = AbortDoc(hdc);
+	if( ret <= 0 ){
+		Nan::ThrowTypeError("AbortDoc failed");
+		return;
+	}
+	args.GetReturnValue().Set(ret);
+}
+
+void startPage(const Nan::FunctionCallbackInfo<Value>& args){
+	// startPage(hdc)
+	if( args.Length() < 1 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	int ret = StartPage(hdc);
+	if( ret <= 0 ){
+		Nan::ThrowTypeError("StartPage failed");
+		return;
+	}
+	args.GetReturnValue().Set(ret);
+}
+
+void endPage(const Nan::FunctionCallbackInfo<Value>& args){
+	// endPage(hdc)
+	if( args.Length() < 1 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	int ret = EndPage(hdc);
+	if( ret <= 0 ){
+		Nan::ThrowTypeError("EndPage failed");
+		return;
+	}
+	args.GetReturnValue().Set(ret);
+}
+
+void moveTo(const Nan::FunctionCallbackInfo<Value>& args){
+	// moveTo(hdc, x, y)
+	if( args.Length() < 3 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() || !args[1]->IsInt32() || !args[2]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	long x = args[1]->Int32Value();
+	long y = args[2]->Int32Value();
+	BOOL ok = MoveToEx(hdc, x, y, NULL);
+	if( !ok ){
+		Nan::ThrowTypeError("MoveToEx failed");
+		return;
+	}
+	args.GetReturnValue().Set(ok);
+}
+
+void lineTo(const Nan::FunctionCallbackInfo<Value>& args){
+	// lineTo(hdc, x, y)
+	if( args.Length() < 3 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() || !args[1]->IsInt32() || !args[2]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	long x = args[1]->Int32Value();
+	long y = args[2]->Int32Value();
+	BOOL ok = LineTo(hdc, x, y);
+	if( !ok ){
+		Nan::ThrowTypeError("LineTo failed");
+		return;
+	}
+	args.GetReturnValue().Set(ok);
+}
+
+void textOut(const Nan::FunctionCallbackInfo<Value>& args){
+	// textOut(hdc, x, y, text)
+	if( args.Length() < 4 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() || !args[1]->IsInt32() || !args[2]->IsInt32() || !args[3]->IsString() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	long x = args[1]->Int32Value();
+	long y = args[2]->Int32Value();
+	String::Value textValue(args[3]);
+	
+	BOOL ok = TextOutW(hdc, x, y, (LPWSTR)*textValue, textValue.length());
+	if( !ok ){
+		Nan::ThrowTypeError("TextOutW failed");
+		return;
+	}
+	args.GetReturnValue().Set(ok);
+}
+
+void selectObject(const Nan::FunctionCallbackInfo<Value>& args){
+	// selectObject(hdc, handle)
+	if( args.Length() < 2 ){
+		Nan::ThrowTypeError("wrong number of arguments");
+		return;
+	}	
+	if( !args[0]->IsInt32() || !args[1]->IsInt32() ){
+		Nan::ThrowTypeError("wrong arguments");
+		return;
+	}
+	HDC hdc = (HDC)args[0]->Int32Value();
+	HANDLE obj = (HANDLE)args[1]->Int32Value();
+	HANDLE prev = SelectObject(hdc, obj);
+	if( prev == NULL || prev == HGDI_ERROR ){
+		Nan::ThrowTypeError("SelectObject failed");
+		return;
+	}
+	args.GetReturnValue().Set((int)prev);
+}
+
 void Init(v8::Local<v8::Object> exports){
 	if( !initWindowClass() ){
 		Nan::ThrowTypeError("initWindowClass failed");
@@ -329,6 +574,30 @@ void Init(v8::Local<v8::Object> exports){
 			Nan::New<v8::FunctionTemplate>(printerDialog)->GetFunction());
 	exports->Set(Nan::New("parseDevmode").ToLocalChecked(),
 			Nan::New<v8::FunctionTemplate>(parseDevmode)->GetFunction());
+	exports->Set(Nan::New("parseDevnames").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(parseDevnames)->GetFunction());
+	exports->Set(Nan::New("createDc").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(createDc)->GetFunction());
+	exports->Set(Nan::New("deleteDc").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(deleteDc)->GetFunction());
+	exports->Set(Nan::New("beginPrint").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(beginPrint)->GetFunction());
+	exports->Set(Nan::New("endPrint").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(endPrint)->GetFunction());
+	exports->Set(Nan::New("abortPrint").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(abortPrint)->GetFunction());
+	exports->Set(Nan::New("startPage").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(startPage)->GetFunction());
+	exports->Set(Nan::New("endPage").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(endPage)->GetFunction());
+	exports->Set(Nan::New("moveTo").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(moveTo)->GetFunction());
+	exports->Set(Nan::New("lineTo").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(lineTo)->GetFunction());
+	exports->Set(Nan::New("textOut").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(textOut)->GetFunction());
+	exports->Set(Nan::New("selectObject").ToLocalChecked(),
+			Nan::New<v8::FunctionTemplate>(selectObject)->GetFunction());
 }
 
 NODE_MODULE(drawer, Init)

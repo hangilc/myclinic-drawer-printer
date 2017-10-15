@@ -34,7 +34,131 @@ api.createPen(width, r, g, b) ==> (throws exception if it fails)
 api.setBkMode(hdc, mode) ==> (throws exception if it fails)
 */
 
+function scaleDrawerOps(ops, scale){
+	var scaled = [];
+	var n = ops.length;
+	for(var i=0;i<n;i++){
+		var op = ops[i];
+		switch(op[0]){
+			case "move_to": {
+				var x = op[1];
+				var y = op[2];
+				scaled.push(["move_to", x * scale, y * scale]);
+				break;
+			}
+			case "line_to": {
+				var x = op[1];
+				var y = op[2];
+				scaled.push(["line_to", x * scale, y * scale]);
+				break;
+			}
+			case "create_font": {
+				var name = op[1];
+				var font = op[2];
+				var size = op[3];
+				var weight = op[4];
+				var italic = op[5];
+				scaled.push(["create_font", name, font, size * scale, weight, italic]);
+				break;
+			}
+			case "draw_chars": {
+				var text = op[1];
+				var xs = op[2];
+				var ys = op[3];
+				var scaled_xs, scaled_ys;
+				if( xs.length ){
+					scaled_xs = xs.map(function(x){ return x * scale; });
+				} else {
+					scaled_xs = xs * scale;
+				}
+				if( ys.length ){
+					scaled_ys = ys.map(function(y){ return y * scale; });
+				} else {
+					scaled_ys = ys * scale;
+				}
+				scaled.push(["draw_chars", text, scaled_xs, scaled_ys]);
+				break;
+			}
+			case "create_pen": {
+				var name = op[1];
+				var r = op[2];
+				var g = op[3];
+				var b = op[4];
+				var w = op[5];
+				scaled.push(["create_pen", name, r, g, b, w * scale]);
+				break;
+			}
+			default: scaled.push(op);
+		}
+	}
+	return scaled;
+}
+
+function shiftDrawerOps(ops, dx, dy){
+	var shifted = [];
+	var n = ops.length;
+	for(var i=0;i<n;i++){
+		var op = ops[i];
+		switch(op[0]){
+			case "move_to": {
+				var x = op[1];
+				var y = op[2];
+				shifted.push(["move_to", x + dx, y + dy]);
+				break;
+			}
+			case "line_to": {
+				var x = op[1];
+				var y = op[2];
+				shifted.push(["line_to", x + dx, y + dy]);
+				break;
+			}
+			case "draw_chars": {
+				var text = op[1];
+				var xs = op[2];
+				var ys = op[3];
+				var shifted_xs, shifted_ys;
+				if( xs.length ){
+					shifted_xs = xs.map(function(x){ return x + dx; });
+				} else {
+					shifted_xs = xs + dx;
+				}
+				if( ys.length ){
+					shifted_ys = ys.map(function(y){ return y + dy; });
+				} else {
+					shifted_ys = ys + dy;
+				}
+				shifted.push(["draw_chars", text, shifted_xs, shifted_ys]);
+				break;
+			}
+			default: shifted.push(op);
+		}
+	}
+	return shifted;
+}
+
+
+function modifyOps(ops, aux){
+	if( aux.scale ){
+		ops = scaleDrawerOps(ops, aux.scale);
+	}
+	var dx = 0;
+	var dy = 0;
+	if( aux.dx ){
+		dx = +aux.dx;
+	}
+	if( aux.dy ){
+		dy = +aux.dy;
+	}
+	if( dx != 0 || dy != 0 ){
+		ops = shiftDrawerOps(ops, dx, dy);
+	}
+	return ops;
+}
+
 exports.printPages = function(pages, setting){
+	if( setting.aux ){
+		pages = pages.map(function(ops){ return modifyOps(ops, setting.aux); });
+	}
 	var hdc = api.createDc(setting.devmode, setting.devnames);
 	if( hdc === 0 ){
 		return "cannot create hdc";
